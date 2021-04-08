@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
   <div class="container">
-    <form action="{{ route('article.store') }}" method="post">
+    <form action="{{ route('article.store') }}" method="post" enctype="multipart/form-data">
       @csrf
       <div class="form-group">
         <label for="title">제목</label>
@@ -16,6 +16,10 @@
         @error('content')
         <p class="invalid-feedback">내용을 입력하세요</p>
         @enderror
+      </div>
+      <div class="form-group">
+        <label for="image">이미지</label>
+        <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" placeholder="">
       </div>
       <button type="submit" class="btn btn-primary">저장</button>
     </form>

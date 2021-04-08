@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ArticleController extends Controller
 {
@@ -40,7 +41,19 @@ class ArticleController extends Controller
     public function store(Request $request)
     {
         // 글쓰기 후 저장
-        Article::create($this->validateArticle());
+        $board = $this->validateArticle();
+        $board['user_id'] = auth()->user()->id;
+        $board['user_name'] = auth()->user()->name;
+
+        if ($request->hasFile('image')) {
+            $fileName = time(). '_'. $request->file('image')->getClientOriginalName();
+            $filePath = $request->file('image')->storeAs('public/images', $fileName);
+            $board['image_name'] = $fileName;
+            $board['image_path'] = $filePath;
+        }
+
+        Article::create($board);
+
         return redirect()->route('article.index');
     }
 
@@ -63,7 +76,9 @@ class ArticleController extends Controller
      */
     public function edit(Article $article)
     {
-        return view('article.edit', compact('article'));
+        $authCheck = Gate::allows('update-post', $article);
+
+        return $authCheck ? view('article.edit', compact('article')) : $this->failedAccessArticle();
     }
 
     /**
@@ -75,6 +90,12 @@ class ArticleController extends Controller
      */
     public function update(Request $request, Article $article)
     {
+        $authCheck = Gate::allows('update-post', $article);
+
+        if (!$authCheck) {
+            return $this->failedAccessArticle();
+        }
+        
         $article->update($this->validateArticle());
         return redirect()->route('article.show', $article->id);
     }
@@ -87,6 +108,12 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        $authCheck = Gate::allows('update-post', $article);
+
+        if (!$authCheck) {
+            return $this->failedAccessArticle();
+        }
+
         $article->delete();
         return redirect()->route('article.index');
     }
@@ -96,5 +123,9 @@ class ArticleController extends Controller
             'title' => 'required',
             'content' => 'required'
         ]);
+    }
+
+    public function failedAccessArticle() {
+        return redirect()->route('article.index')->with('message', '작성자가 아닙니다.');
     }
 }

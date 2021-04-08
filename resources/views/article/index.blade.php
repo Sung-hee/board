@@ -1,6 +1,11 @@
 @extends('layouts.app')
 @section('content')
   <div class="container">
+  @if(session('message'))
+      <span class="alert alert-danger" role="alert">
+          <strong>{{ session('message') }}</strong>
+      </span>
+  @endif
     @foreach($articles as $article)
       <div class="card mb-3">
         <div class="row no-gutters">
@@ -13,7 +18,10 @@
                 <a href="{{ route('article.show', $article->id) }}">{{ $article->title }}</a>
               </h5>
               <p class="card-text">{{ $article->content }}</p>
-              <p class="card-text"><small class="text-muted">{{ $article->updated_at }}</small></p>
+              <p class="card-text">
+                <small class="text-muted">작성자 : {{ $article->user_name }}</small> | 
+                <small class="text-muted">{{ $article->updated_at }}</small>
+              </p>
             </div>
           </div>
         </div>
