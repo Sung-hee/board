@@ -40,3 +40,5 @@ Route::middleware('auth')->prefix('article')->group(function() {
 });
 
 Route::get('/auth/email-authenticate/{token}', 'Auth\LoginController@authenticateEmail')->name('auth.email-authenticate');
+
+Route::post('/comments/store', 'CommentController@store')->name('comment.add');

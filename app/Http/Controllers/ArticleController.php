@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -65,7 +66,8 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        return view('article.show', compact('article'));
+        $comment = Comment::where('article_id', '=', $article->id)->orderBy('created_at', 'desc')->get();
+        return view('article.show', compact('article', 'comment'));
     }
 
     /**
@@ -77,8 +79,10 @@ class ArticleController extends Controller
     public function edit(Article $article)
     {
         $authCheck = Gate::allows('update-post', $article);
-
         return $authCheck ? view('article.edit', compact('article')) : $this->failedAccessArticle();
+
+        // $authCheck = Gate::inspect('article-auth-check', $article);
+        // return $authCheck->allowed() ? view('article.edit', compact('article')) : $this->failedAccessArticle();
     }
 
     /**
